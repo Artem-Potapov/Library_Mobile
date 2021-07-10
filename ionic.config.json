@@ -1,0 +1,7 @@
+{
+  "name": "Smart_library_mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
