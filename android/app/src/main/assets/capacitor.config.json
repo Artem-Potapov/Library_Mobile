@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "Smart_library_mobile",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}

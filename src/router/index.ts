@@ -1,14 +1,19 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
 
+
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '',
-    redirect: '/folder/Inbox'
+    path: '/books',
+    component: () => import ('../views/Home.vue')
   },
   {
-    path: '/folder/:id',
-    component: () => import ('../views/Folder.vue')
+    path: '/favorite',
+    component: () => import ('../views/Favorite.vue')
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/books'
   }
 ]
 

@@ -4,8 +4,7 @@
       <ion-menu content-id="main-content" type="overlay">
         <ion-content>
           <ion-list id="inbox-list">
-            <ion-list-header>Inbox</ion-list-header>
-            <ion-note>hi@ionicframework.com</ion-note>
+            
   
             <ion-menu-toggle auto-hide="false" v-for="(p, i) in appPages" :key="i">
               <ion-item @click="selectedIndex = i" router-direction="root" :router-link="p.url" lines="none" detail="false" class="hydrated" :class="{ selected: selectedIndex === i }">
@@ -15,23 +14,87 @@
             </ion-menu-toggle>
           </ion-list>
   
-          <ion-list id="labels-list">
-            <ion-list-header>Labels</ion-list-header>
-  
-            <ion-item v-for="(label, index) in labels" lines="none" :key="index">
-              <ion-icon slot="start" :ios="bookmarkOutline" :md="bookmarkSharp"></ion-icon>
-              <ion-label>{{ label }}</ion-label>
-            </ion-item>
-          </ion-list>
         </ion-content>
       </ion-menu>
+      <ion-menu
+          menu-id="filters"
+          content-id="main-content"
+          side="end"
+          style="
+        padding: 10px
+        width: 200px;
+        background: white;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+      "
+        >
+          <ion-content content-id="content">
+            <h4><b>Автор:</b></h4>
+            <a-select
+              style="align-self: flex-start; width: 200px"
+              v-model="filters.author"
+            >
+              <a-select-option :value="0"> Все авторы </a-select-option>
+              <a-select-option
+                :value="author"
+                v-for="author in authors"
+                :key="author"
+              >
+                {{ author }}
+              </a-select-option>
+            </a-select>
+
+            <h4><b>Жанр:</b></h4>
+            <a-select
+              style="align-self: flex-start; width: 200px"
+              v-model="filters.genre"
+            >
+              <a-select-option :value="0"> Все жанры </a-select-option>
+              <a-select-option
+                :value="genre"
+                v-for="genre in genres"
+                :key="genre"
+              >
+                {{ genre }}
+              </a-select-option>
+            </a-select>
+
+            <h4><b>Возраст:</b></h4>
+            <a-select
+              style="align-self: flex-start; width: 200px"
+              v-model="filters.age"
+            >
+              <a-select-option :value="0"> Все возрасты </a-select-option>
+              <a-select-option :value="age" v-for="age in ages" :key="age">
+                {{ age }}
+              </a-select-option>
+            </a-select>
+            <!-- Рейтинг -->
+            <h4><b>Рейтинг:</b></h4>
+            <a-select
+              style="align-self: flex-start; width: 200px"
+              v-model="filters.rating"
+            >
+              <a-select-option :value="0"> Любой рейтинг </a-select-option>
+              <a-select-option
+                :value="index"
+                v-for="(rating, index) in ratings"
+                :key="index"
+              >
+                {{ rating }}
+              </a-select-option>
+            </a-select>
+            <a-button type="primary" :style="kek" @click="filter"
+              >Найти</a-button
+            >
+          </ion-content>
+        </ion-menu>
       <ion-router-outlet id="main-content"></ion-router-outlet>
     </IonSplitPane>
   </IonApp>
 </template>
 
 <script lang="ts">
-import { IonApp, IonContent, IonIcon, IonItem, IonLabel, IonList, IonListHeader, IonMenu, IonMenuToggle, IonNote, IonRouterOutlet, IonSplitPane } from '@ionic/vue';
+import { IonApp, IonContent, IonIcon, IonItem, IonLabel, IonList, IonMenu, IonMenuToggle, IonRouterOutlet, IonSplitPane } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { archiveOutline, archiveSharp, bookmarkOutline, bookmarkSharp, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
@@ -44,52 +107,76 @@ export default defineComponent({
     IonIcon, 
     IonItem, 
     IonLabel, 
-    IonList, 
-    IonListHeader, 
+    IonList,  
     IonMenu, 
-    IonMenuToggle, 
-    IonNote, 
+    IonMenuToggle,  
     IonRouterOutlet, 
     IonSplitPane,
+  },
+  mounted() {
+    this.axios.get("https://musaev.online:5000/books").then((res) => {
+      this.books = res.data;
+    });
+    this.axios.get("https://musaev.online:5000/authors").then((res) => {
+      this.authors = res.data;
+    });
+    this.axios.get("https://musaev.online:5000/genres").then((res) => {
+      this.genres = res.data;
+    });
+    this.axios.get("https://musaev.online:5000/ages").then((res) => {
+      this.ages = res.data;
+    });
+  },
+  methods: {
+    filter() {
+      this.axios
+        .get("https://musaev.online:5000/books", {
+          params: { filters: this.filters },
+        })
+        .then((res) => {
+          this.books = res.data;
+        });
+      console.log(this.filters);
+    },
+  },
+  data() {
+    return {
+      size: "large",
+      desc: ["1", "2", "3", "4", "5"],
+      books: [],
+      authors: [],
+      genres: [],
+      ages: [],
+      ratings: {
+        1: "1+",
+        2: "2+",
+        3: "3+",
+        4: "4+",
+        5: "5",
+      },
+      kek: "display:block; margin-top:10px; margin-left:0;",
+      filters: {
+        author: 0,
+        genre: 0,
+        age: 0,
+        rating: 0,
+      },
+    };
   },
   setup() {
     const selectedIndex = ref(0);
     const appPages = [
       {
-        title: 'Inbox',
-        url: '/folder/Inbox',
+        title: 'Books',
+        url: '/books',
         iosIcon: mailOutline,
-        mdIcon: mailSharp
-      },
-      {
-        title: 'Outbox',
-        url: '/folder/Outbox',
-        iosIcon: paperPlaneOutline,
-        mdIcon: paperPlaneSharp
+        mdIcon: bookmarkOutline
       },
       {
         title: 'Favorites',
-        url: '/folder/Favorites',
+        url: '/favorite',
         iosIcon: heartOutline,
         mdIcon: heartSharp
-      },
-      {
-        title: 'Archived',
-        url: '/folder/Archived',
-        iosIcon: archiveOutline,
-        mdIcon: archiveSharp
-      },
-      {
-        title: 'Trash',
-        url: '/folder/Trash',
-        iosIcon: trashOutline,
-        mdIcon: trashSharp
-      },
-      {
-        title: 'Spam',
-        url: '/folder/Spam',
-        iosIcon: warningOutline,
-        mdIcon: warningSharp
       }
     ];
     const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
@@ -125,9 +212,21 @@ export default defineComponent({
 });
 </script>
 
+
 <style scoped>
 ion-menu ion-content {
-  --background: var(--ion-item-background, var(--ion-background-color, #fff));
+  --background: #001529;
+}
+ion-list {
+  background-color: #001529;
+  border-bottom:0 !important;
+}
+ion-item {
+  --background: #001529;
+  --color-activated: #fff;
+}
+ion-label {
+  --color:#fff !important;
 }
 
 ion-menu.md ion-content {
